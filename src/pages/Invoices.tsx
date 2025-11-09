@@ -1,127 +1,183 @@
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Download, CheckCircle, Clock, XCircle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileText, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { FormModal } from "@/components/common/FormModal";
+import { InvoiceForm } from "@/components/invoices/InvoiceForm";
+import { InvoiceTable, Invoice } from "@/components/invoices/InvoiceTable";
+import { toast } from "sonner";
 
 export default function Invoices() {
+  const { t } = useTranslation();
+  const [invoices, setInvoices] = useState<Invoice[]>([
+    { id: "NFE-001234", type: "NF-e", customer: "João Silva", value: "R$ 2,459.90", status: "issued", date: "2025-11-08", taxId: "12345678901234" },
+    { id: "NFCE-005678", type: "NFC-e", customer: "Maria Santos", value: "R$ 459.50", status: "processing", date: "2025-11-08", taxId: "98765432109876" },
+    { id: "NFSE-009012", type: "NFS-e", customer: "TechCorp Ltda", value: "R$ 8,999.00", status: "issued", date: "2025-11-07", taxId: "11223344556677" },
+    { id: "NFE-001235", type: "NF-e", customer: "Pedro Costa", value: "R$ 1,299.00", status: "error", date: "2025-11-07", taxId: "22334455667788" },
+    { id: "NFCE-005679", type: "NFC-e", customer: "Ana Oliveira", value: "R$ 349.90", status: "issued", date: "2025-11-06", taxId: "33445566778899" },
+  ]);
+
+  const [isNewInvoiceOpen, setIsNewInvoiceOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    type: "NF-e",
+    customer: "",
+    taxId: "",
+    value: "",
+  });
+
+  const handleFormChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleCreateInvoice = () => {
+    if (!formData.customer || !formData.taxId || !formData.value) {
+      toast.error(t('invoices.requiredFields'));
+      return;
+    }
+
+    const newInvoice: Invoice = {
+      id: `${formData.type.replace("-", "")}-${String(Math.floor(Math.random() * 900000) + 100000)}`,
+      type: formData.type,
+      customer: formData.customer,
+      taxId: formData.taxId,
+      value: `R$ ${parseFloat(formData.value).toFixed(2)}`,
+      status: "processing",
+      date: new Date().toISOString().split("T")[0],
+    };
+
+    setInvoices(prev => [newInvoice, ...prev]);
+    setIsNewInvoiceOpen(false);
+    setFormData({ type: "NF-e", customer: "", taxId: "", value: "" });
+    toast.success(t('invoices.invoiceCreated'));
+  };
+
+  const handleViewInvoice = (invoice: Invoice) => {
+    toast.info(`${t('invoices.viewingInvoice')}: ${invoice.id}`);
+  };
+
+  const handleDownloadInvoice = (invoice: Invoice) => {
+    toast.success(`${t('invoices.downloadingInvoice')}: ${invoice.id}`);
+  };
+
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <div className="relative h-64 overflow-hidden bg-gradient-primary">
-        <div className="absolute inset-0 flex items-center">
-          <div className="container mx-auto px-6">
-            <h1 className="text-4xl font-bold text-white mb-2">Invoices</h1>
-            <p className="text-white/90 text-lg">Automatic NF-e, NFC-e, and NFS-e generation</p>
-          </div>
+    <div className="min-h-full pb-8">
+      <PageHeader
+        title={t('invoices.title')}
+        description={t('invoices.subtitle')}
+        backgroundImage="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=2000"
+      />
+
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+          <Card className="p-4 sm:p-6 shadow-soft">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs sm:text-sm text-muted-foreground">{t('invoices.issuedToday')}</span>
+              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
+            </div>
+            <p className="text-xl sm:text-2xl font-bold">127</p>
+            <p className="text-xs text-muted-foreground mt-1">+15% {t('invoices.fromYesterday')}</p>
+          </Card>
+          <Card className="p-4 sm:p-6 shadow-soft">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs sm:text-sm text-muted-foreground">{t('invoices.processing')}</span>
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-warning" />
+            </div>
+            <p className="text-xl sm:text-2xl font-bold">23</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('invoices.averageWait')}</p>
+          </Card>
+          <Card className="p-4 sm:p-6 shadow-soft">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs sm:text-sm text-muted-foreground">{t('invoices.totalValue')}</span>
+              <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            </div>
+            <p className="text-xl sm:text-2xl font-bold">R$ 45.9K</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('invoices.todaysInvoices')}</p>
+          </Card>
+          <Card className="p-4 sm:p-6 shadow-soft">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs sm:text-sm text-muted-foreground">{t('invoices.errors')}</span>
+              <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-destructive" />
+            </div>
+            <p className="text-xl sm:text-2xl font-bold">3</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('invoices.needsAttention')}</p>
+          </Card>
         </div>
+
+        {/* Main Content */}
+        <Tabs defaultValue="individual" className="space-y-6">
+          <TabsList className="w-full sm:w-auto">
+            <TabsTrigger value="individual" className="flex-1 sm:flex-none">{t('invoices.individual')}</TabsTrigger>
+            <TabsTrigger value="bulk" className="flex-1 sm:flex-none">{t('invoices.bulk')}</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="individual" className="space-y-6">
+            <Card className="p-4 sm:p-6 shadow-soft">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <h3 className="text-lg font-semibold">{t('invoices.recentInvoices')}</h3>
+                <Button onClick={() => setIsNewInvoiceOpen(true)} className="w-full sm:w-auto">
+                  <FileText className="h-4 w-4 mr-2" />
+                  {t('invoices.newInvoice')}
+                </Button>
+              </div>
+              <InvoiceTable
+                invoices={invoices}
+                onView={handleViewInvoice}
+                onDownload={handleDownloadInvoice}
+              />
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="bulk" className="space-y-6">
+            <Card className="p-4 sm:p-6 shadow-soft">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div>
+                  <h3 className="text-lg font-semibold">{t('invoices.bulkBatches')}</h3>
+                  <p className="text-sm text-muted-foreground mt-1">{t('invoices.processMultiple')}</p>
+                </div>
+                <Button className="w-full sm:w-auto">
+                  <FileText className="h-4 w-4 mr-2" />
+                  {t('invoices.newBatch')}
+                </Button>
+              </div>
+              <p className="text-muted-foreground">Bulk invoice batches will appear here.</p>
+            </Card>
+
+            {/* Tax Calculation Info */}
+            <Card className="p-4 sm:p-6 shadow-soft bg-primary/5 border-primary/20">
+              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-primary" />
+                {t('invoices.sefazActive')}
+              </h4>
+              <p className="text-sm text-muted-foreground mb-2">
+                {t('invoices.sefazDescription')}
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                <li>• {t('invoices.icms')}</li>
+                <li>• {t('invoices.pisCofins')}</li>
+                <li>• {t('invoices.ipi')}</li>
+                <li>• {t('invoices.iss')}</li>
+              </ul>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-6 py-8">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6 shadow-soft">
-            <div className="flex items-center gap-3 mb-2">
-              <CheckCircle className="h-5 w-5 text-success" />
-              <p className="text-sm text-muted-foreground">Issued</p>
-            </div>
-            <p className="text-2xl font-bold">1,089</p>
-          </Card>
-          <Card className="p-6 shadow-soft">
-            <div className="flex items-center gap-3 mb-2">
-              <Clock className="h-5 w-5 text-warning" />
-              <p className="text-sm text-muted-foreground">Pending</p>
-            </div>
-            <p className="text-2xl font-bold">23</p>
-          </Card>
-          <Card className="p-6 shadow-soft">
-            <div className="flex items-center gap-3 mb-2">
-              <XCircle className="h-5 w-5 text-destructive" />
-              <p className="text-sm text-muted-foreground">Failed</p>
-            </div>
-            <p className="text-2xl font-bold">5</p>
-          </Card>
-          <Card className="p-6 shadow-soft">
-            <div className="flex items-center gap-3 mb-2">
-              <FileText className="h-5 w-5 text-primary" />
-              <p className="text-sm text-muted-foreground">Total</p>
-            </div>
-            <p className="text-2xl font-bold">1,117</p>
-          </Card>
-        </div>
-
-        {/* Invoices Table */}
-        <Card className="p-6 shadow-soft">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Recent Invoices</h3>
-            <div className="flex gap-2">
-              <select className="px-4 py-2 rounded-lg border border-input bg-background text-sm">
-                <option>All Types</option>
-                <option>NF-e</option>
-                <option>NFC-e</option>
-                <option>NFS-e</option>
-              </select>
-              <select className="px-4 py-2 rounded-lg border border-input bg-background text-sm">
-                <option>All Status</option>
-                <option>Issued</option>
-                <option>Pending</option>
-                <option>Failed</option>
-              </select>
-            </div>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Invoice #</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Type</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Order</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Date</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Customer</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Amount</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Status</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { invoice: "NFE-2025-001234", type: "NF-e", order: "#ORD-1234", date: "2025-01-08", customer: "João Silva", amount: "R$ 299.90", status: "Issued" },
-                  { invoice: "NFCE-2025-005678", type: "NFC-e", order: "#ORD-1235", date: "2025-01-08", customer: "Maria Santos", amount: "R$ 459.50", status: "Pending" },
-                  { invoice: "NFE-2025-001233", type: "NF-e", order: "#ORD-1236", date: "2025-01-07", customer: "Pedro Costa", amount: "R$ 199.00", status: "Issued" },
-                  { invoice: "NFSE-2025-000123", type: "NFS-e", order: "#ORD-1237", date: "2025-01-07", customer: "Ana Oliveira", amount: "R$ 349.90", status: "Failed" },
-                  { invoice: "NFE-2025-001232", type: "NF-e", order: "#ORD-1238", date: "2025-01-06", customer: "Carlos Lima", amount: "R$ 549.90", status: "Issued" },
-                ].map((invoice) => (
-                  <tr key={invoice.invoice} className="border-b border-border hover:bg-muted/30 transition-colors">
-                    <td className="py-3 px-4 font-medium">{invoice.invoice}</td>
-                    <td className="py-3 px-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                        {invoice.type}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-sm">{invoice.order}</td>
-                    <td className="py-3 px-4 text-sm">{invoice.date}</td>
-                    <td className="py-3 px-4">{invoice.customer}</td>
-                    <td className="py-3 px-4 font-medium">{invoice.amount}</td>
-                    <td className="py-3 px-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        invoice.status === "Issued" ? "bg-success/10 text-success" :
-                        invoice.status === "Pending" ? "bg-warning/10 text-warning" :
-                        "bg-destructive/10 text-destructive"
-                      }`}>
-                        {invoice.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <Button variant="ghost" size="sm">
-                        <Download className="h-4 w-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      </div>
+      {/* New Invoice Modal */}
+      <FormModal
+        open={isNewInvoiceOpen}
+        onOpenChange={setIsNewInvoiceOpen}
+        title={t('invoices.createInvoice')}
+        description={t('invoices.createInvoiceDesc')}
+        onSubmit={handleCreateInvoice}
+        submitLabel={t('invoices.newInvoice')}
+        cancelLabel={t('common.cancel')}
+      >
+        <InvoiceForm formData={formData} onChange={handleFormChange} />
+      </FormModal>
     </div>
   );
 }

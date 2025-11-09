@@ -1,0 +1,159 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "download": "Download",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date",
+    "total": "Total",
+    "close": "Close",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "invoices": "Invoices",
+    "salesAnalysis": "Sales Analysis",
+    "adManagement": "Ad Management",
+    "realtimeProfit": "Real-time Profit",
+    "bestSellers": "Best Sellers",
+    "reports": "Reports",
+    "multiAccounts": "Multi-accounts",
+    "integrations": "Integrations",
+    "inventory": "Inventory",
+    "products": "Products",
+    "registrations": "Registrations",
+    "automation": "Automation",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Welcome back! Here's your business overview",
+    "totalRevenue": "Total Revenue",
+    "netProfit": "Net Profit",
+    "orders": "Orders",
+    "products": "Products",
+    "fromLastMonth": "from last month",
+    "newThisWeek": "new this week",
+    "revenueAndProfit": "Revenue & Profit Trends",
+    "salesByChannel": "Sales by Channel",
+    "weeklyOrders": "Weekly Orders",
+    "recentOrders": "Recent Orders",
+    "orderId": "Order ID",
+    "customer": "Customer",
+    "shipped": "Shipped",
+    "processing": "Processing",
+    "delivered": "Delivered"
+  },
+  "invoices": {
+    "title": "Automatic Invoice Issuance",
+    "subtitle": "Generate and manage NF-e, NFC-e, and NFS-e invoices with SEFAZ integration",
+    "issuedToday": "Issued Today",
+    "processing": "Processing",
+    "totalValue": "Total Value",
+    "errors": "Errors",
+    "fromYesterday": "from yesterday",
+    "averageWait": "Average: 2min",
+    "todaysInvoices": "Today's invoices",
+    "needsAttention": "Needs attention",
+    "individual": "Individual",
+    "bulk": "Bulk",
+    "recentInvoices": "Recent Invoices",
+    "newInvoice": "New Invoice",
+    "invoiceId": "Invoice ID",
+    "type": "Type",
+    "taxId": "Tax ID",
+    "value": "Value",
+    "bulkBatches": "Bulk Invoice Batches",
+    "processMultiple": "Process multiple marketplace orders at once",
+    "newBatch": "New Batch",
+    "sefazActive": "SEFAZ Integration Active",
+    "sefazDescription": "All invoices are automatically validated and submitted to SEFAZ. Tax calculations include:",
+    "icms": "ICMS (State Tax) - Automatically calculated based on NCM and state",
+    "pisCofins": "PIS/COFINS (Federal Taxes) - Applied according to tax regime",
+    "ipi": "IPI (Industrialized Products Tax) - When applicable",
+    "iss": "ISS (Service Tax) - For NFS-e invoices",
+    "createInvoice": "Create New Invoice",
+    "createInvoiceDesc": "Fill in the details to create a new invoice",
+    "invoiceType": "Invoice Type",
+    "selectType": "Select invoice type",
+    "nfe": "NF-e (Electronic Invoice)",
+    "nfce": "NFC-e (Consumer Electronic Invoice)",
+    "nfse": "NFS-e (Service Electronic Invoice)",
+    "customerName": "Customer Name",
+    "enterCustomer": "Enter customer name",
+    "taxIdLabel": "Tax ID (CPF/CNPJ)",
+    "taxIdPlaceholder": "00.000.000/0000-00",
+    "valueLabel": "Value (R$)",
+    "valuePlaceholder": "0.00",
+    "requiredFields": "Please fill in all required fields",
+    "invoiceCreated": "Invoice created successfully!",
+    "viewingInvoice": "Viewing invoice",
+    "downloadingInvoice": "Downloading invoice"
+  },
+  "sales": {
+    "title": "Sales Analysis",
+    "subtitle": "Complete view of orders, commissions, and shipping"
+  },
+  "ads": {
+    "title": "Ad Management",
+    "subtitle": "Manage ads across all marketplaces with automatic profit calculation"
+  },
+  "profit": {
+    "title": "Real-time Profit",
+    "subtitle": "View profit by product and channel with automatic updates"
+  },
+  "bestSellers": {
+    "title": "Best-Selling Products",
+    "subtitle": "Identify top performers and optimize your product mix"
+  },
+  "reports": {
+    "title": "Performance Reports",
+    "subtitle": "Customized reports on sales, products, inventory, and revenue"
+  },
+  "accounts": {
+    "title": "Multi-accounts & Multi-marketplaces",
+    "subtitle": "Manage multiple accounts across different marketplaces"
+  },
+  "integrations": {
+    "title": "Integrations",
+    "subtitle": "Connect with marketplaces, logistics operators, and payment gateways"
+  },
+  "inventory": {
+    "title": "Inventory & Logistics Control",
+    "subtitle": "Manage stock across multiple channels with automatic updates"
+  },
+  "products": {
+    "title": "Products",
+    "subtitle": "Manage your product catalog"
+  },
+  "registrations": {
+    "title": "Centralized Registrations",
+    "subtitle": "Manage products, customers, suppliers, and vendors in one place"
+  },
+  "automation": {
+    "title": "Process Automation",
+    "subtitle": "Configure automated workflows for invoices, inventory, and channel-specific rules"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Configure your platform preferences"
+  },
+  "language": {
+    "label": "Language",
+    "english": "English",
+    "portuguese": "Português (Brasil)"
+  }
+}

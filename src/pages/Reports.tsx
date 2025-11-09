@@ -1,8 +1,51 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, Calendar } from "lucide-react";
+import { Download, Calendar, FileText, CheckCircle } from "lucide-react";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 export default function Reports() {
+  const [dateRange, setDateRange] = useState("Last 7 days");
+  const [marketplace, setMarketplace] = useState("All Marketplaces");
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exportSuccess, setExportSuccess] = useState(false);
+
+  // Revenue by Marketplace data
+  const revenueData = [
+    { name: "Mercado Livre", value: 55230, color: "hsl(var(--chart-1))" },
+    { name: "Shopee", value: 38450, color: "hsl(var(--chart-2))" },
+    { name: "Amazon", value: 24120, color: "hsl(var(--chart-3))" },
+    { name: "Magalu", value: 7630, color: "hsl(var(--chart-4))" },
+  ];
+
+  // Profit Trend data
+  const profitTrendData = [
+    { date: "Jan 1", profit: 3200 },
+    { date: "Jan 2", profit: 3800 },
+    { date: "Jan 3", profit: 3500 },
+    { date: "Jan 4", profit: 4200 },
+    { date: "Jan 5", profit: 3900 },
+    { date: "Jan 6", profit: 4500 },
+    { date: "Jan 7", profit: 4800 },
+  ];
+
+  const handleExport = () => {
+    setExportSuccess(true);
+    setTimeout(() => {
+      setExportSuccess(false);
+      setExportDialogOpen(false);
+    }, 2000);
+  };
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -22,7 +65,11 @@ export default function Reports() {
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-muted-foreground" />
-              <select className="px-4 py-2 rounded-lg border border-input bg-background">
+              <select 
+                className="px-4 py-2 rounded-lg border border-input bg-background text-foreground"
+                value={dateRange}
+                onChange={(e) => setDateRange(e.target.value)}
+              >
                 <option>Last 7 days</option>
                 <option>Last 30 days</option>
                 <option>This month</option>
@@ -32,14 +79,18 @@ export default function Reports() {
                 <option>Custom range</option>
               </select>
             </div>
-            <select className="px-4 py-2 rounded-lg border border-input bg-background">
+            <select 
+              className="px-4 py-2 rounded-lg border border-input bg-background text-foreground"
+              value={marketplace}
+              onChange={(e) => setMarketplace(e.target.value)}
+            >
               <option>All Marketplaces</option>
               <option>Mercado Livre</option>
               <option>Shopee</option>
               <option>Amazon</option>
               <option>Magalu</option>
             </select>
-            <Button className="ml-auto">
+            <Button className="ml-auto" onClick={() => setExportDialogOpen(true)}>
               <Download className="h-4 w-4 mr-2" />
               Export Report
             </Button>
@@ -69,14 +120,65 @@ export default function Reports() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <Card className="p-6 shadow-soft">
             <h3 className="text-lg font-semibold mb-4">Revenue by Marketplace</h3>
-            <div className="h-80 flex items-center justify-center bg-muted/30 rounded-lg">
-              <p className="text-muted-foreground">Pie chart - Revenue distribution</p>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={revenueData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {revenueData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                  />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
           </Card>
           <Card className="p-6 shadow-soft">
             <h3 className="text-lg font-semibold mb-4">Profit Trend</h3>
-            <div className="h-80 flex items-center justify-center bg-muted/30 rounded-lg">
-              <p className="text-muted-foreground">Line chart - Profit over time</p>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={profitTrendData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis 
+                    dataKey="date" 
+                    stroke="hsl(var(--muted-foreground))"
+                    style={{ fontSize: '12px' }}
+                  />
+                  <YAxis 
+                    stroke="hsl(var(--muted-foreground))"
+                    style={{ fontSize: '12px' }}
+                    tickFormatter={(value) => `R$ ${value}`}
+                  />
+                  <Tooltip 
+                    formatter={(value: number) => [`R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 'Profit']}
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="profit" 
+                    stroke="hsl(var(--primary))" 
+                    strokeWidth={3}
+                    dot={{ fill: 'hsl(var(--primary))', r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </Card>
         </div>
@@ -152,6 +254,64 @@ export default function Reports() {
           </div>
         </Card>
       </div>
+
+      {/* Export Dialog */}
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {exportSuccess ? (
+                <>
+                  <CheckCircle className="h-5 w-5 text-success" />
+                  Export Successful
+                </>
+              ) : (
+                <>
+                  <FileText className="h-5 w-5" />
+                  Export Report
+                </>
+              )}
+            </DialogTitle>
+            <DialogDescription>
+              {exportSuccess ? (
+                "Your report has been successfully generated and downloaded."
+              ) : (
+                `Export report for ${dateRange} - ${marketplace}`
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          {!exportSuccess && (
+            <>
+              <div className="py-4 space-y-3">
+                <p className="text-sm text-muted-foreground">Select export format:</p>
+                <div className="grid grid-cols-3 gap-3">
+                  <Button variant="outline" className="h-20 flex-col">
+                    <FileText className="h-6 w-6 mb-2" />
+                    PDF
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col">
+                    <FileText className="h-6 w-6 mb-2" />
+                    Excel
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col">
+                    <FileText className="h-6 w-6 mb-2" />
+                    CSV
+                  </Button>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleExport}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -60,6 +60,12 @@ All colors MUST be HSL.
     --shadow-soft: 0 2px 8px -2px hsl(224 20% 12% / 0.08);
     --shadow-medium: 0 4px 16px -4px hsl(224 20% 12% / 0.12);
     --shadow-strong: 0 8px 32px -8px hsl(224 20% 12% / 0.16);
+
+    --chart-1: 221 83% 53%;
+    --chart-2: 142 76% 36%;
+    --chart-3: 262 83% 58%;
+    --chart-4: 32 95% 44%;
+    --chart-5: 27 87% 67%;
   }
 
   .dark {
@@ -113,6 +119,12 @@ All colors MUST be HSL.
     --shadow-soft: 0 2px 8px -2px hsl(0 0% 0% / 0.3);
     --shadow-medium: 0 4px 16px -4px hsl(0 0% 0% / 0.4);
     --shadow-strong: 0 8px 32px -8px hsl(0 0% 0% / 0.5);
+
+    --chart-1: 221 83% 53%;
+    --chart-2: 142 76% 46%;
+    --chart-3: 262 83% 68%;
+    --chart-4: 32 95% 54%;
+    --chart-5: 27 87% 67%;
   }
 }
 

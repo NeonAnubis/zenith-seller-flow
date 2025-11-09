@@ -328,7 +328,13 @@
     "selectExportFormat": "Select export format:",
     "pdf": "PDF",
     "excel": "Excel",
-    "csv": "CSV"
+    "csv": "CSV",
+    "pdfReport": "PDF Report",
+    "pdfReportDescription": "Generate a comprehensive PDF report with all data and charts",
+    "includesCharts": "Includes all charts and visualizations",
+    "includesTables": "Includes detailed data tables",
+    "professionalLayout": "Professional, modern layout",
+    "downloadPDF": "Download PDF"
   },
   "accounts": {
     "title": "Multi-accounts & Multi-marketplaces",

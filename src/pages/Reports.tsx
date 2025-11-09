@@ -1,25 +1,25 @@
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Download, Calendar, FileText, CheckCircle } from "lucide-react";
 import { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { generateReportPDF } from "@/utils/generateReportPDF";
+import { toast } from "sonner";
 
 export default function Reports() {
-  const { t } = useTranslation();
-  const [dateRange, setDateRange] = useState(t('reports.last7Days'));
-  const [marketplace, setMarketplace] = useState(t('reports.allMarketplaces'));
+  const { t, i18n } = useTranslation();
+  const [dateRange, setDateRange] = useState("last7Days");
+  const [marketplace, setMarketplace] = useState("all");
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
-  const [exportSuccess, setExportSuccess] = useState(false);
 
   // Revenue by Marketplace data
   const revenueData = [
@@ -40,12 +40,70 @@ export default function Reports() {
     { date: "Jan 7", profit: 4800 },
   ];
 
-  const handleExport = () => {
-    setExportSuccess(true);
-    setTimeout(() => {
-      setExportSuccess(false);
+  const topProducts = [
+    { product: "Bluetooth Speaker Mini", units: 456, revenue: "R$ 68,371.20", profit: "R$ 36,442.40", margin: "53.3%" },
+    { product: "USB-C Cable 2m", units: 892, revenue: "R$ 26,670.80", profit: "R$ 15,966.80", margin: "59.9%" },
+    { product: "Phone Case Premium", units: 321, revenue: "R$ 25,647.90", profit: "R$ 14,415.90", margin: "56.2%" },
+    { product: "Portable Charger 10000mAh", units: 567, revenue: "R$ 84,993.30", profit: "R$ 48,154.30", margin: "56.7%" },
+    { product: "Wireless Headphones Pro", units: 234, revenue: "R$ 70,156.60", profit: "R$ 35,076.60", margin: "50.0%" },
+  ];
+
+  const marketplacePerformance = [
+    { marketplace: t('sales.mercadoLivre'), orders: 543, revenue: "R$ 55,230", avg: "R$ 101.70", commission: "R$ 8,284.50", profit: "R$ 18,765.20" },
+    { marketplace: t('sales.shopee'), orders: 412, revenue: "R$ 38,450", avg: "R$ 93.32", commission: "R$ 5,767.50", profit: "R$ 13,054.30" },
+    { marketplace: t('sales.amazon'), orders: 198, revenue: "R$ 24,120", avg: "R$ 121.82", commission: "R$ 3,618.00", profit: "R$ 8,195.40" },
+    { marketplace: t('ads.magalu'), orders: 81, revenue: "R$ 7,630", avg: "R$ 94.20", commission: "R$ 1,144.50", profit: "R$ 2,592.10" },
+  ];
+
+  const getDateRangeLabel = (value: string) => {
+    const labels: Record<string, string> = {
+      last7Days: t('reports.last7Days'),
+      last30Days: t('reports.last30Days'),
+      thisMonth: t('reports.thisMonth'),
+      lastMonth: t('reports.lastMonth'),
+      thisQuarter: t('reports.thisQuarter'),
+      thisYear: t('reports.thisYear'),
+      customRange: t('reports.customRange'),
+    };
+    return labels[value] || value;
+  };
+
+  const getMarketplaceLabel = (value: string) => {
+    const labels: Record<string, string> = {
+      all: t('reports.allMarketplaces'),
+      mercadoLivre: t('sales.mercadoLivre'),
+      shopee: t('sales.shopee'),
+      amazon: t('sales.amazon'),
+      magalu: t('ads.magalu'),
+    };
+    return labels[value] || value;
+  };
+
+  const handleExportPDF = () => {
+    try {
+      generateReportPDF({
+        dateRange: getDateRangeLabel(dateRange),
+        marketplace: getMarketplaceLabel(marketplace),
+        language: i18n.language,
+        metrics: {
+          totalRevenue: "R$ 125,430",
+          revenueGrowth: "+12.5%",
+          netProfit: "R$ 45,230",
+          profitGrowth: "+8.2%",
+          profitMargin: "36.1%",
+          marginChange: "-1.2%",
+        },
+        revenueByMarketplace: revenueData,
+        profitTrend: profitTrendData,
+        topProducts,
+        marketplacePerformance,
+      });
+      toast.success(t('reports.reportGenerated'));
       setExportDialogOpen(false);
-    }, 2000);
+    } catch (error) {
+      toast.error('Error generating PDF');
+      console.error('PDF generation error:', error);
+    }
   };
 
   return (
@@ -67,31 +125,33 @@ export default function Reports() {
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-muted-foreground" />
-              <select
-                className="px-4 py-2 rounded-lg border border-input bg-background text-foreground"
-                value={dateRange}
-                onChange={(e) => setDateRange(e.target.value)}
-              >
-                <option>{t('reports.last7Days')}</option>
-                <option>{t('reports.last30Days')}</option>
-                <option>{t('reports.thisMonth')}</option>
-                <option>{t('reports.lastMonth')}</option>
-                <option>{t('reports.thisQuarter')}</option>
-                <option>{t('reports.thisYear')}</option>
-                <option>{t('reports.customRange')}</option>
-              </select>
+              <Select value={dateRange} onValueChange={setDateRange}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="last7Days">{t('reports.last7Days')}</SelectItem>
+                  <SelectItem value="last30Days">{t('reports.last30Days')}</SelectItem>
+                  <SelectItem value="thisMonth">{t('reports.thisMonth')}</SelectItem>
+                  <SelectItem value="lastMonth">{t('reports.lastMonth')}</SelectItem>
+                  <SelectItem value="thisQuarter">{t('reports.thisQuarter')}</SelectItem>
+                  <SelectItem value="thisYear">{t('reports.thisYear')}</SelectItem>
+                  <SelectItem value="customRange">{t('reports.customRange')}</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <select
-              className="px-4 py-2 rounded-lg border border-input bg-background text-foreground"
-              value={marketplace}
-              onChange={(e) => setMarketplace(e.target.value)}
-            >
-              <option>{t('reports.allMarketplaces')}</option>
-              <option>{t('reports.mercadoLivre')}</option>
-              <option>{t('reports.shopee')}</option>
-              <option>{t('reports.amazon')}</option>
-              <option>{t('reports.magalu')}</option>
-            </select>
+            <Select value={marketplace} onValueChange={setMarketplace}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('reports.allMarketplaces')}</SelectItem>
+                <SelectItem value="mercadoLivre">{t('sales.mercadoLivre')}</SelectItem>
+                <SelectItem value="shopee">{t('sales.shopee')}</SelectItem>
+                <SelectItem value="amazon">{t('sales.amazon')}</SelectItem>
+                <SelectItem value="magalu">{t('ads.magalu')}</SelectItem>
+              </SelectContent>
+            </Select>
             <Button className="ml-auto" onClick={() => setExportDialogOpen(true)}>
               <Download className="h-4 w-4 mr-2" />
               {t('reports.exportReport')}
@@ -200,13 +260,7 @@ export default function Reports() {
                 </tr>
               </thead>
               <tbody>
-                {[
-                  { product: "Bluetooth Speaker Mini", units: 456, revenue: "R$ 68,371.20", profit: "R$ 36,442.40", margin: "53.3%" },
-                  { product: "USB-C Cable 2m", units: 892, revenue: "R$ 26,670.80", profit: "R$ 15,966.80", margin: "59.9%" },
-                  { product: "Phone Case Premium", units: 321, revenue: "R$ 25,647.90", profit: "R$ 14,415.90", margin: "56.2%" },
-                  { product: "Portable Charger 10000mAh", units: 567, revenue: "R$ 84,993.30", profit: "R$ 48,154.30", margin: "56.7%" },
-                  { product: "Wireless Headphones Pro", units: 234, revenue: "R$ 70,156.60", profit: "R$ 35,076.60", margin: "50.0%" },
-                ].map((item, index) => (
+                {topProducts.map((item, index) => (
                   <tr key={index} className="border-b border-border hover:bg-muted/30 transition-colors">
                     <td className="py-3 px-4 font-medium">{item.product}</td>
                     <td className="py-3 px-4">{item.units}</td>
@@ -236,12 +290,7 @@ export default function Reports() {
                 </tr>
               </thead>
               <tbody>
-                {[
-                  { marketplace: t('sales.mercadoLivre'), orders: 543, revenue: "R$ 55,230", avg: "R$ 101.70", commission: "R$ 8,284.50", profit: "R$ 18,765.20" },
-                  { marketplace: t('sales.shopee'), orders: 412, revenue: "R$ 38,450", avg: "R$ 93.32", commission: "R$ 5,767.50", profit: "R$ 13,054.30" },
-                  { marketplace: t('sales.amazon'), orders: 198, revenue: "R$ 24,120", avg: "R$ 121.82", commission: "R$ 3,618.00", profit: "R$ 8,195.40" },
-                  { marketplace: t('ads.magalu'), orders: 81, revenue: "R$ 7,630", avg: "R$ 94.20", commission: "R$ 1,144.50", profit: "R$ 2,592.10" },
-                ].map((item) => (
+                {marketplacePerformance.map((item) => (
                   <tr key={item.marketplace} className="border-b border-border hover:bg-muted/30 transition-colors">
                     <td className="py-3 px-4 font-medium">{item.marketplace}</td>
                     <td className="py-3 px-4">{item.orders}</td>
@@ -259,59 +308,44 @@ export default function Reports() {
 
       {/* Export Dialog */}
       <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {exportSuccess ? (
-                <>
-                  <CheckCircle className="h-5 w-5 text-success" />
-                  {t('reports.exportSuccessful')}
-                </>
-              ) : (
-                <>
-                  <FileText className="h-5 w-5" />
-                  {t('reports.exportReportDialog')}
-                </>
-              )}
+              <FileText className="h-5 w-5" />
+              {t('reports.exportReportDialog')}
             </DialogTitle>
             <DialogDescription>
-              {exportSuccess ? (
-                t('reports.reportGenerated')
-              ) : (
-                `${t('common.export')} ${dateRange} - ${marketplace}`
-              )}
+              {getDateRangeLabel(dateRange)} - {getMarketplaceLabel(marketplace)}
             </DialogDescription>
           </DialogHeader>
-          {!exportSuccess && (
-            <>
-              <div className="py-4 space-y-3">
-                <p className="text-sm text-muted-foreground">{t('reports.selectExportFormat')}</p>
-                <div className="grid grid-cols-3 gap-3">
-                  <Button variant="outline" className="h-20 flex-col">
-                    <FileText className="h-6 w-6 mb-2" />
-                    {t('reports.pdf')}
-                  </Button>
-                  <Button variant="outline" className="h-20 flex-col">
-                    <FileText className="h-6 w-6 mb-2" />
-                    {t('reports.excel')}
-                  </Button>
-                  <Button variant="outline" className="h-20 flex-col">
-                    <FileText className="h-6 w-6 mb-2" />
-                    {t('reports.csv')}
-                  </Button>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
-                  {t('common.cancel')}
-                </Button>
-                <Button onClick={handleExport}>
-                  <Download className="h-4 w-4 mr-2" />
-                  {t('common.export')}
-                </Button>
-              </DialogFooter>
-            </>
-          )}
+
+          <div className="py-6">
+            <div className="bg-muted/20 rounded-lg p-6 text-center">
+              <FileText className="h-16 w-16 mx-auto mb-4 text-primary" />
+              <h4 className="font-semibold mb-2">{t('reports.pdfReport')}</h4>
+              <p className="text-sm text-muted-foreground mb-4">
+                {t('reports.pdfReportDescription')}
+              </p>
+              <ul className="text-xs text-muted-foreground space-y-1 mb-6 text-left">
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-3 w-3 text-success" />
+                  {t('reports.includesCharts')}
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-3 w-3 text-success" />
+                  {t('reports.includesTables')}
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="h-3 w-3 text-success" />
+                  {t('reports.professionalLayout')}
+                </li>
+              </ul>
+              <Button onClick={handleExportPDF} className="w-full">
+                <Download className="h-4 w-4 mr-2" />
+                {t('reports.downloadPDF')}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

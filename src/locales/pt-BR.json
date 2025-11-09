@@ -328,7 +328,13 @@
     "selectExportFormat": "Selecione o formato de exportação:",
     "pdf": "PDF",
     "excel": "Excel",
-    "csv": "CSV"
+    "csv": "CSV",
+    "pdfReport": "Relatório PDF",
+    "pdfReportDescription": "Gere um relatório PDF abrangente com todos os dados e gráficos",
+    "includesCharts": "Inclui todos os gráficos e visualizações",
+    "includesTables": "Inclui tabelas de dados detalhadas",
+    "professionalLayout": "Layout moderno e profissional",
+    "downloadPDF": "Baixar PDF"
   },
   "accounts": {
     "title": "Multi-contas e Multi-marketplaces",

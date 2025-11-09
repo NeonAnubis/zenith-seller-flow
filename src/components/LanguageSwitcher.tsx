@@ -1,29 +1,53 @@
 import { useTranslation } from 'react-i18next';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Globe } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function LanguageSwitcher() {
-  const { i18n, t } = useTranslation();
+  const { i18n } = useTranslation();
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
   };
 
+  const currentLanguage = i18n.language;
+
   return (
     <div className="w-full px-3 py-4 border-t border-sidebar-border">
-      <div className="flex items-center gap-2 mb-2">
-        <Globe className="h-4 w-4 text-sidebar-foreground" />
-        <span className="text-xs text-sidebar-foreground font-medium">{t('language.label')}</span>
+      <div className="flex items-center justify-center gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => changeLanguage('pt-BR')}
+          className={`p-1 h-auto rounded-md transition-all ${
+            currentLanguage === 'pt-BR'
+              ? 'ring-2 ring-primary ring-offset-2 ring-offset-sidebar'
+              : 'opacity-60 hover:opacity-100'
+          }`}
+          title="Português (Brasil)"
+        >
+          <img
+            src="/flags/brazil.jpg"
+            alt="Português (Brasil)"
+            className="w-8 h-6 object-cover rounded"
+          />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => changeLanguage('en')}
+          className={`p-1 h-auto rounded-md transition-all ${
+            currentLanguage === 'en'
+              ? 'ring-2 ring-primary ring-offset-2 ring-offset-sidebar'
+              : 'opacity-60 hover:opacity-100'
+          }`}
+          title="English (US)"
+        >
+          <img
+            src="/flags/us.jpg"
+            alt="English (US)"
+            className="w-8 h-6 object-cover rounded"
+          />
+        </Button>
       </div>
-      <Select value={i18n.language} onValueChange={changeLanguage}>
-        <SelectTrigger className="w-full bg-sidebar-accent/50 border-sidebar-border text-sidebar-foreground">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="pt-BR">{t('language.portuguese')}</SelectItem>
-          <SelectItem value="en">{t('language.english')}</SelectItem>
-        </SelectContent>
-      </Select>
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { FormModal } from "@/components/common/FormModal";
 import { InvoiceForm } from "@/components/invoices/InvoiceForm";
 import { InvoiceTable, Invoice } from "@/components/invoices/InvoiceTable";
 import { InvoiceDetailModal } from "@/components/invoices/InvoiceDetailModal";
+import { BulkInvoiceModal } from "@/components/invoices/BulkInvoiceModal";
 import { generateInvoicePDF } from "@/utils/generateInvoicePDF";
 import { toast } from "sonner";
 
@@ -23,8 +24,31 @@ export default function Invoices() {
   ]);
 
   const [isNewInvoiceOpen, setIsNewInvoiceOpen] = useState(false);
+  const [isBulkInvoiceOpen, setIsBulkInvoiceOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [bulkBatches, setBulkBatches] = useState<Array<{
+    id: string;
+    date: string;
+    count: number;
+    totalValue: string;
+    status: string;
+  }>>([
+    {
+      id: "BATCH-001",
+      date: "2025-11-08",
+      count: 15,
+      totalValue: "R$ 25,487.50",
+      status: "completed",
+    },
+    {
+      id: "BATCH-002",
+      date: "2025-11-07",
+      count: 8,
+      totalValue: "R$ 12,340.00",
+      status: "processing",
+    },
+  ]);
   const [formData, setFormData] = useState({
     type: "NF-e",
     customer: "",
@@ -71,6 +95,54 @@ export default function Invoices() {
       toast.error('Error generating PDF');
       console.error('PDF generation error:', error);
     }
+  };
+
+  const handleBulkInvoiceSubmit = (items: Array<{ id: string; customer: string; taxId: string; value: string; type: string }>) => {
+    // Create batch record
+    const batchId = `BATCH-${String(Math.floor(Math.random() * 900) + 100).padStart(3, '0')}`;
+    const totalValue = items.reduce((sum, item) => sum + parseFloat(item.value), 0);
+
+    const newBatch = {
+      id: batchId,
+      date: new Date().toISOString().split("T")[0],
+      count: items.length,
+      totalValue: `R$ ${totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      status: "processing",
+    };
+
+    setBulkBatches(prev => [newBatch, ...prev]);
+
+    // Create individual invoices
+    const newInvoices: Invoice[] = items.map((item) => ({
+      id: `${item.type.replace("-", "")}-${String(Math.floor(Math.random() * 900000) + 100000)}`,
+      type: item.type,
+      customer: item.customer,
+      taxId: item.taxId,
+      value: `R$ ${parseFloat(item.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      status: "processing",
+      date: new Date().toISOString().split("T")[0],
+    }));
+
+    setInvoices(prev => [...newInvoices, ...prev]);
+
+    toast.success(`${t('invoices.batchCreated')}: ${batchId} (${items.length} ${t('invoices.invoices')})`);
+
+    // Simulate processing completion after 2 seconds
+    setTimeout(() => {
+      setBulkBatches(prev =>
+        prev.map(batch =>
+          batch.id === batchId ? { ...batch, status: "completed" } : batch
+        )
+      );
+      setInvoices(prev =>
+        prev.map(inv =>
+          newInvoices.find(ni => ni.id === inv.id) && inv.status === "processing"
+            ? { ...inv, status: "issued" }
+            : inv
+        )
+      );
+      toast.success(`${t('invoices.batchCompleted')}: ${batchId}`);
+    }, 2000);
   };
 
   return (
@@ -149,12 +221,59 @@ export default function Invoices() {
                   <h3 className="text-lg font-semibold">{t('invoices.bulkBatches')}</h3>
                   <p className="text-sm text-muted-foreground mt-1">{t('invoices.processMultiple')}</p>
                 </div>
-                <Button className="w-full sm:w-auto">
+                <Button onClick={() => setIsBulkInvoiceOpen(true)} className="w-full sm:w-auto">
                   <FileText className="h-4 w-4 mr-2" />
                   {t('invoices.newBatch')}
                 </Button>
               </div>
-              <p className="text-muted-foreground">Bulk invoice batches will appear here.</p>
+
+              {bulkBatches.length === 0 ? (
+                <div className="text-center py-12 bg-muted/20 rounded-lg">
+                  <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground">{t('invoices.noBatchesYet')}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{t('invoices.createFirstBatch')}</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">{t('invoices.batchId')}</th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground hidden sm:table-cell">{t('invoices.date')}</th>
+                        <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">{t('invoices.count')}</th>
+                        <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">{t('invoices.totalValue')}</th>
+                        <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">{t('invoices.status')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {bulkBatches.map((batch) => (
+                        <tr key={batch.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                          <td className="py-3 px-4 font-medium text-sm">{batch.id}</td>
+                          <td className="py-3 px-4 text-sm hidden sm:table-cell">{batch.date}</td>
+                          <td className="py-3 px-4 text-center font-medium">{batch.count}</td>
+                          <td className="py-3 px-4 text-right font-medium">{batch.totalValue}</td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-2">
+                              {batch.status === "completed" ? (
+                                <CheckCircle className="h-4 w-4 text-success" />
+                              ) : (
+                                <Clock className="h-4 w-4 text-warning" />
+                              )}
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                batch.status === "completed"
+                                  ? "bg-success/10 text-success"
+                                  : "bg-warning/10 text-warning"
+                              }`}>
+                                {batch.status}
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </Card>
 
             {/* Tax Calculation Info */}
@@ -195,6 +314,13 @@ export default function Invoices() {
         invoice={selectedInvoice}
         open={isDetailModalOpen}
         onOpenChange={setIsDetailModalOpen}
+      />
+
+      {/* Bulk Invoice Modal */}
+      <BulkInvoiceModal
+        open={isBulkInvoiceOpen}
+        onOpenChange={setIsBulkInvoiceOpen}
+        onSubmit={handleBulkInvoiceSubmit}
       />
     </div>
   );

@@ -109,7 +109,22 @@
     "requiredFields": "Please fill in all required fields",
     "invoiceCreated": "Invoice created successfully",
     "viewingInvoice": "Viewing invoice",
-    "downloadingInvoice": "Downloading invoice"
+    "downloadingInvoice": "Downloading invoice",
+    "invoiceDetails": "Invoice Details",
+    "detailedInformation": "Detailed information for invoice",
+    "invoiceNumber": "Invoice Number",
+    "status": "Status",
+    "type": "Type",
+    "issueDate": "Issue Date",
+    "customerInformation": "Customer Information",
+    "financialDetails": "Financial Details",
+    "subtotal": "Subtotal",
+    "totalValue": "Total Value",
+    "sefazInformation": "SEFAZ Information",
+    "accessKey": "Access Key",
+    "protocol": "Protocol",
+    "authorization": "Authorization",
+    "authorized": "Authorized"
   },
   "sales": {
     "title": "Sales Analysis",

@@ -8,6 +8,8 @@ import { FileText, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import { FormModal } from "@/components/common/FormModal";
 import { InvoiceForm } from "@/components/invoices/InvoiceForm";
 import { InvoiceTable, Invoice } from "@/components/invoices/InvoiceTable";
+import { InvoiceDetailModal } from "@/components/invoices/InvoiceDetailModal";
+import { generateInvoicePDF } from "@/utils/generateInvoicePDF";
 import { toast } from "sonner";
 
 export default function Invoices() {
@@ -21,6 +23,8 @@ export default function Invoices() {
   ]);
 
   const [isNewInvoiceOpen, setIsNewInvoiceOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     type: "NF-e",
     customer: "",
@@ -55,11 +59,18 @@ export default function Invoices() {
   };
 
   const handleViewInvoice = (invoice: Invoice) => {
-    toast.info(`${t('invoices.viewingInvoice')}: ${invoice.id}`);
+    setSelectedInvoice(invoice);
+    setIsDetailModalOpen(true);
   };
 
   const handleDownloadInvoice = (invoice: Invoice) => {
-    toast.success(`${t('invoices.downloadingInvoice')}: ${invoice.id}`);
+    try {
+      generateInvoicePDF(invoice);
+      toast.success(`${t('invoices.downloadingInvoice')}: ${invoice.id}`);
+    } catch (error) {
+      toast.error('Error generating PDF');
+      console.error('PDF generation error:', error);
+    }
   };
 
   return (
@@ -178,6 +189,13 @@ export default function Invoices() {
       >
         <InvoiceForm formData={formData} onChange={handleFormChange} />
       </FormModal>
+
+      {/* Invoice Detail Modal */}
+      <InvoiceDetailModal
+        invoice={selectedInvoice}
+        open={isDetailModalOpen}
+        onOpenChange={setIsDetailModalOpen}
+      />
     </div>
   );
 }

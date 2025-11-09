@@ -109,7 +109,22 @@
     "requiredFields": "Por favor, preencha todos os campos obrigatórios",
     "invoiceCreated": "Nota fiscal criada com sucesso",
     "viewingInvoice": "Visualizando nota fiscal",
-    "downloadingInvoice": "Baixando nota fiscal"
+    "downloadingInvoice": "Baixando nota fiscal",
+    "invoiceDetails": "Detalhes da Nota Fiscal",
+    "detailedInformation": "Informações detalhadas da nota fiscal",
+    "invoiceNumber": "Número da Nota",
+    "status": "Status",
+    "type": "Tipo",
+    "issueDate": "Data de Emissão",
+    "customerInformation": "Informações do Cliente",
+    "financialDetails": "Detalhes Financeiros",
+    "subtotal": "Subtotal",
+    "totalValue": "Valor Total",
+    "sefazInformation": "Informações SEFAZ",
+    "accessKey": "Chave de Acesso",
+    "protocol": "Protocolo",
+    "authorization": "Autorização",
+    "authorized": "Autorizada"
   },
   "sales": {
     "title": "Análise de Vendas",
